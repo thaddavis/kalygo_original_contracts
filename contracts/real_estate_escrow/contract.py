@@ -82,7 +82,7 @@ def approval_program():
                     Txn.sender() == App.globalGet(GLOBAL_SELLER),
                     App.globalGet(GLOBAL_SIGNAL_PULL_OUT) == Int(0),
                     App.globalGet(GLOBAL_SIGNAL_ARBITRATION) == Int(0),
-                    Global.latest_timestamp() > App.globalGet(GLOBAL_CLOSING_DATE),
+                    # Global.latest_timestamp() > App.globalGet(GLOBAL_CLOSING_DATE),
                 )
             )
             .Then(
@@ -110,13 +110,14 @@ def approval_program():
             If(
                 And(
                     Txn.sender() == App.globalGet(GLOBAL_BUYER),
+                    # Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END),
                     Or(
                         And(
                             App.globalGet(GLOBAL_SIGNAL_PULL_OUT) > Int(0),
                             (
                                 Balance(Global.current_application_address())
                                     - Global.min_balance() - Global.min_txn_fee()
-                            ) > App.globalGet(GLOBAL_1st_ESCROW_AMOUNT)
+                            ) >= App.globalGet(GLOBAL_1st_ESCROW_AMOUNT) - Global.min_txn_fee()
                         )
                     )   
                 )
@@ -126,7 +127,7 @@ def approval_program():
                     InnerTxnBuilder.Begin(),
                     InnerTxnBuilder.SetFields({
                         TxnField.type_enum: TxnType.Payment,
-                        TxnField.amount: App.globalGet(GLOBAL_1st_ESCROW_AMOUNT),
+                        TxnField.amount: App.globalGet(GLOBAL_1st_ESCROW_AMOUNT) - Global.min_txn_fee(),
                         TxnField.sender: Global.current_application_address(),
                         TxnField.receiver: Txn.sender(),
                         TxnField.fee: Global.min_txn_fee(),
@@ -147,7 +148,7 @@ def approval_program():
                 And(
                     Txn.sender() == App.globalGet(GLOBAL_ARBITER),
                     App.globalGet(GLOBAL_SIGNAL_ARBITRATION) > Int(0),
-                    Global.latest_timestamp() > App.globalGet(GLOBAL_CLOSING_DATE),
+                    # Global.latest_timestamp() > App.globalGet(GLOBAL_CLOSING_DATE),
                     Or(
                         App.globalGet(GLOBAL_SELLER) == Txn.application_args[1],
                         App.globalGet(GLOBAL_BUYER) == Txn.application_args[1],
@@ -161,7 +162,15 @@ def approval_program():
                         TxnField.type_enum: TxnType.Payment,
                         TxnField.amount: Balance(Global.current_application_address()) - Global.min_balance() - Global.min_txn_fee(),
                         TxnField.sender: Global.current_application_address(),
-                        TxnField.receiver: Txn.application_args[1],
+                        # TxnField.receiver: Txn.application_args[1],
+                        TxnField.receiver: 
+                            # If(App.globalGet(GLOBAL_BUYER) == Txn.application_args[1])
+                            # .Then(
+                                # Txn.accounts[0]
+                            # )
+                            # .Else(
+                                Txn.accounts[0],
+                            # ),
                         TxnField.fee: Global.min_txn_fee(),
                     }),
                     InnerTxnBuilder.Submit()

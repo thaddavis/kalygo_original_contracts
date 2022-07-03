@@ -28,25 +28,25 @@ def create_app(
     params.flat_fee = True
     params.fee = 1000
 
-    txn = transaction.ApplicationCreateTxn(
-        sender,
-        params,
-        on_complete,
-        approval_program,
-        clear_program,
-        global_schema,
-        local_schema,
-        app_args,
-    )
-
-    # txn = transaction.ApplicationUpdateTxn(
+    # txn = transaction.ApplicationCreateTxn(
     #     sender,
     #     params,
-    #     354,
+    #     on_complete,
     #     approval_program,
     #     clear_program,
-    #     app_args
+    #     global_schema,
+    #     local_schema,
+    #     app_args,
     # )
+
+    txn = transaction.ApplicationUpdateTxn(
+        sender,
+        params,
+        config.app_id,
+        approval_program,
+        clear_program,
+        app_args
+    )
 
     # sign transaction
     signed_txn = txn.sign(private_key)
@@ -63,9 +63,9 @@ def create_app(
 
     print(transaction_response)
 
-    app_id = transaction_response["application-index"]
+    # app_id = transaction_response["application-index"]
     
-    # app_id = transaction_response["txn"]["txn"]["apid"]
+    app_id = transaction_response["txn"]["txn"]["apid"]
     
     print("Created new app-id:", app_id)
 
