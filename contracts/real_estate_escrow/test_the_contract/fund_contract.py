@@ -29,9 +29,10 @@ if __name__ == "__main__":
         json.dumps(app_address, indent=4)))
 
     receiver = app_address
-    sender = "RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"
+    # sender = "RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"
+    sender = "QHGMAMCTEHZ2RQV2DRXSPAKIIT3REVK46CHNDJSW6WNXJLSJ7BB76NHDGY"
     note = "Fund Escrow".encode()
-    amount = 2000
+    amount = 100000
     
     unsigned_txn_A = transaction.PaymentTxn(
         sender,

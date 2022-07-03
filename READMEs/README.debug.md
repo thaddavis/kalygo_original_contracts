@@ -27,3 +27,5 @@ goal clerk dryrun -t signout.tx --dryrun-dump -o dr.msgp
 tealdbg debug -d dr.msgp --listen 0.0.0.0
 
 // --- ^^^ --- ^^^ --- ^^^ --- ^^^ ---
+
+echo "iaRhcGFhkcQPc2lnbmFsX3B1bGxfb3V0pGFwaWTM9aNmZWXNA+iiZnbOAAGUeaNnZW6qc2FuZG5ldC12MaJnaMQg3SI23LH1Eec0kQDmcZSH8O1P+36mkI0y2z1WMYK+DoWibHbOAAGYYaNzbmTEIInUejmiCH6XIhqIxSrttL9SVS1uNqKm8XFCfDgwCAzKpHR5cGWkYXBwbA==" | base64 -d | msgpacktool -d

@@ -23,12 +23,16 @@ def approval_program():
     GLOBAL_2nd_ESCROW_AMOUNT = Bytes("2nd_escrow_amount") # int
     GLOBAL_SIGNAL_PULL_OUT = Bytes("signal_pull_out") # byteslice
     GLOBAL_SIGNAL_ARBITRATION = Bytes("signal_arbitration") # byteslice
+    GLOBAL_CONTRACT_ADDRESS = Bytes("contract_address") # byteslice
+    GLOBAL_CONTRACT_BALANCE = Bytes("contract_balance") # byteslice
     # ^^^ ^^^ ^^^
     SIGNAL_PULL_OUT=Bytes("signal_pull_out") # CONSTANT
     SIGNAL_ARBITRATION=Bytes("signal_arbitration") # CONSTANT
     BUYER_WITHDRAW_FUNDS=Bytes("buyer_withdraw_funds") # CONSTANT
     SELLER_WITHDRAW_FUNDS=Bytes("seller_withdraw_funds") # CONSTANT
     ARBITER_WITHDRAW_FUNDS=Bytes("arbiter_withdraw_funds") # CONSTANT
+    FUND_CONTRACT=Bytes("fund_contract")
+    FUND_MINIMUM_BALANCE=Bytes("fund_minimum_balance")
     
     @Subroutine(TealType.none)
     def signal_pull_out():
@@ -36,11 +40,15 @@ def approval_program():
             If(
                 And(
                     Txn.sender() == App.globalGet(GLOBAL_BUYER),
-                    Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END)
+                    # Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END)
                 )
             )
             .Then(
-                App.globalPut(GLOBAL_SIGNAL_PULL_OUT, App.globalGet(GLOBAL_SIGNAL_PULL_OUT) + Int(1))
+                Seq(
+                    App.globalPut(GLOBAL_CONTRACT_ADDRESS, Global.current_application_address()),
+                    App.globalPut(GLOBAL_CONTRACT_BALANCE, Balance(Global.current_application_address())),
+                    App.globalPut(GLOBAL_SIGNAL_PULL_OUT, App.globalGet(GLOBAL_SIGNAL_PULL_OUT) + Int(1))
+                )
             )
             .Else(
                 Reject()
@@ -54,7 +62,7 @@ def approval_program():
             If(
                 And(
                     Txn.sender() == App.globalGet(GLOBAL_BUYER),
-                    Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_EXTENSION)
+                    # Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_EXTENSION)
                 )
             )
             .Then(
@@ -74,7 +82,7 @@ def approval_program():
                     Txn.sender() == App.globalGet(GLOBAL_SELLER),
                     App.globalGet(GLOBAL_SIGNAL_PULL_OUT) == Int(0),
                     App.globalGet(GLOBAL_SIGNAL_ARBITRATION) == Int(0),
-                    Global.latest_timestamp() > App.globalGet(GLOBAL_CLOSING_DATE)
+                    Global.latest_timestamp() > App.globalGet(GLOBAL_CLOSING_DATE),
                 )
             )
             .Then(
@@ -173,14 +181,39 @@ def approval_program():
                     And(
                         Gtxn[0].sender() == App.globalGet(GLOBAL_BUYER),
                         Gtxn[0].amount() == App.globalGet(GLOBAL_1st_ESCROW_AMOUNT),
-                        Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_BEGIN)
+                        # Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_BEGIN),
+                        # Balance(Global.current_application_address()) == Global.min_balance()
                     ),
                     And(
                         Gtxn[0].sender() == App.globalGet(GLOBAL_BUYER),
                         Gtxn[0].amount() == App.globalGet(GLOBAL_2nd_ESCROW_AMOUNT),
-                        Global.latest_timestamp() > App.globalGet(GLOBAL_INSPECTION_BEGIN),
-                        Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE)
+                        # Global.latest_timestamp() > App.globalGet(GLOBAL_INSPECTION_BEGIN),
+                        # Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE)
                     )
+                )
+            )
+            .Then(
+                Seq(
+                    App.globalPut(GLOBAL_CONTRACT_ADDRESS, Global.current_application_address()),
+                    App.globalPut(GLOBAL_CONTRACT_BALANCE, Balance(Global.current_application_address())),
+                    Approve(),
+                )
+            )
+            .Else(
+                Reject()
+            )
+        ])
+
+    @Subroutine(TealType.none)
+    def fund_minimum_balance():
+        return Seq([
+            If(
+                And(
+                    Gtxn[0].sender() == App.globalGet(GLOBAL_BUYER),
+                    # Gtxn[0].sender() == App.globalGet(GLOBAL_CREATOR)
+                    # Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_BEGIN),
+                    # Gtxn[0].amount() == Global.min_balance(),
+                    # Balance(Global.current_application_address()) == Int(0)
                 )
             )
             .Then(
@@ -224,6 +257,7 @@ def approval_program():
             Approve()
         ),
         close_out=Seq(Approve()),
+        update=Seq(Approve()),
         no_op=Seq(
             Cond(
                 [ Txn.application_args[0] == SIGNAL_PULL_OUT, signal_pull_out() ],
@@ -234,9 +268,20 @@ def approval_program():
                 [ 
                     And(
                         Global.group_size() == Int(2),
-                        Gtxn[0].type_enum() == TxnType.Payment
+                        Gtxn[0].type_enum() == TxnType.Payment,
+                        Gtxn[1].type_enum() == TxnType.ApplicationCall,
+                        Gtxn[1].application_args[0] == FUND_CONTRACT
                     ),
                     fund_account()
+                ],
+                [
+                    And(
+                        Global.group_size() == Int(2),
+                        Gtxn[0].type_enum() == TxnType.Payment,
+                        Gtxn[1].type_enum() == TxnType.ApplicationCall,
+                        Gtxn[1].application_args[0] == FUND_MINIMUM_BALANCE
+                    ),
+                    fund_minimum_balance()
                 ]
             ),
             Reject()

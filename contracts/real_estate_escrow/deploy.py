@@ -1,4 +1,4 @@
-from algosdk import account
+from algosdk import account, mnemonic
 from algosdk.encoding import decode_address, encode_address
 from algosdk.v2client import algod
 from algosdk.future import transaction
@@ -39,6 +39,15 @@ def create_app(
         app_args,
     )
 
+    # txn = transaction.ApplicationUpdateTxn(
+    #     sender,
+    #     params,
+    #     354,
+    #     approval_program,
+    #     clear_program,
+    #     app_args
+    # )
+
     # sign transaction
     signed_txn = txn.sign(private_key)
     tx_id = signed_txn.transaction.get_txid()
@@ -51,7 +60,13 @@ def create_app(
 
     # display results
     transaction_response = client.pending_transaction_info(tx_id)
+
+    print(transaction_response)
+
     app_id = transaction_response["application-index"]
+    
+    # app_id = transaction_response["txn"]["txn"]["apid"]
+    
     print("Created new app-id:", app_id)
 
     return app_id
@@ -62,12 +77,17 @@ def main():
 
     # seller_private_key = get_private_key_from_mnemonic(config.seller_mnemonic)
     # buyer_private_key = get_private_key_from_mnemonic(config.buyer_mnemonic)
-    
+    # print('buyer_private_key', buyer_private_key)
+
+    # public_key = mnemonic.to_public_key(config.buyer_mnemonic)
+
+    # print('public_key', public_key)
+
     # declare application state storage (immutable)
     local_ints = 0
     local_bytes = 0
-    global_ints = 11
-    global_bytes = 4
+    global_ints = 12
+    global_bytes = 5
     global_schema = transaction.StateSchema(global_ints, global_bytes)
     local_schema = transaction.StateSchema(local_ints, local_bytes)
  
