@@ -4,10 +4,12 @@ from algosdk.v2client import algod
 from algosdk.future import transaction
 from contract import approval_program, clear_state_program
 from pyteal import compileTeal, Mode
+from pyteal_helpers import program
 from utility.general import get_private_key_from_mnemonic, wait_for_confirmation, compile_program, intToBytes
 from utility.state import read_global_state
 from utility.time import get_current_timestamp, get_future_timestamp_in_days, get_future_timestamp_in_secs
 import config
+import importlib
 import json
 import time
 
@@ -95,12 +97,20 @@ def main():
     approval_program_teal = compileTeal(
         approval_program_ast, mode=Mode.Application, version=5
     )
+
+    with open('./build/approval.teal', "w") as h:
+            h.write(approval_program_teal)
+
     approval_program_compiled = compile_program(algod_client, approval_program_teal)
 
     clear_state_program_ast = clear_state_program()
     clear_state_program_teal = compileTeal(
         clear_state_program_ast, mode=Mode.Application, version=5
     )
+
+    with open('./build/clear.teal', "w") as h:
+            h.write(clear_state_program_teal)
+
     clear_state_program_compiled = compile_program(
         algod_client, clear_state_program_teal
     )
@@ -125,24 +135,24 @@ def main():
         "" # arbiter
     ]
 
-    app_id = create_app(
-        algod_client,
-        creator_private_key,
-        approval_program_compiled,
-        clear_state_program_compiled,
-        global_schema,
-        local_schema,
-        app_args,
-    )
+    # app_id = create_app(
+    #     algod_client,
+    #     creator_private_key,
+    #     approval_program_compiled,
+    #     clear_state_program_compiled,
+    #     global_schema,
+    #     local_schema,
+    #     app_args,
+    # )
 
-    global_state = read_global_state(
-            algod_client, account.address_from_private_key(creator_private_key), app_id
-    ),
+    # global_state = read_global_state(
+    #         algod_client, account.address_from_private_key(creator_private_key), app_id
+    # ),
 
-    print("Global state: {}".format(
-            json.dumps(global_state, indent=4)
-        )
-    )
+    # print("Global state: {}".format(
+    #         json.dumps(global_state, indent=4)
+    #     )
+    # )
 
 if __name__ == "__main__":
     main()
