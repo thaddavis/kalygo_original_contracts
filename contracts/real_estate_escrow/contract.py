@@ -197,11 +197,19 @@ def approval_program():
                 Or(
                     And(
                         Gtxn[0].sender() == App.globalGet(GLOBAL_BUYER),
-                        Gtxn[0].amount() == App.globalGet(GLOBAL_1st_ESCROW_AMOUNT)
+                        Gtxn[0].amount() == App.globalGet(GLOBAL_1st_ESCROW_AMOUNT),
+                        And(
+                            App.globalGet(GLOBAL_ENABLE_TIME_CHECKS) == Int(1),
+                            Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END)
+                        ),
                     ),
                     And(
                         Gtxn[0].sender() == App.globalGet(GLOBAL_BUYER),
-                        Gtxn[0].amount() == App.globalGet(GLOBAL_2nd_ESCROW_AMOUNT)
+                        Gtxn[0].amount() == App.globalGet(GLOBAL_2nd_ESCROW_AMOUNT),
+                        And(
+                            App.globalGet(GLOBAL_ENABLE_TIME_CHECKS) == Int(1),
+                            Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END)
+                        ),
                     )
                 )
             )
