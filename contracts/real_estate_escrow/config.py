@@ -7,4 +7,4 @@ buyer_mnemonic = "tennis blouse junior catch purse earth make purse honey hidden
 algod_address = "http://localhost:4001"
 algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
-app_id=388
+app_id=523

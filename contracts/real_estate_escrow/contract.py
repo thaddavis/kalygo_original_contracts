@@ -11,7 +11,7 @@ def approval_program():
     # vvv vvv vvv
     GLOBAL_CREATOR=Bytes("creator") # byteslice
     GLOBAL_SELLER=Bytes("seller") # byteslice
-    GLOBAL_ARBITER=Bytes("arbiter") #byteslice
+    GLOBAL_ARBITER=Bytes("arbiter") # byteslice
     GLOBAL_BUYER=Bytes("buyer") # byteslice
     GLOBAL_INSPECTION_BEGIN = Bytes("inspection_begin") # int
     GLOBAL_INSPECTION_END = Bytes("inspection_end") # int
@@ -21,10 +21,11 @@ def approval_program():
     GLOBAL_SALE_PRICE=Bytes("sale_price") # int
     GLOBAL_1st_ESCROW_AMOUNT = Bytes("1st_escrow_amount") # int
     GLOBAL_2nd_ESCROW_AMOUNT = Bytes("2nd_escrow_amount") # int
-    GLOBAL_SIGNAL_PULL_OUT = Bytes("signal_pull_out") # byteslice
-    GLOBAL_SIGNAL_ARBITRATION = Bytes("signal_arbitration") # byteslice
+    GLOBAL_SIGNAL_PULL_OUT = Bytes("signal_pull_out") # int
+    GLOBAL_SIGNAL_ARBITRATION = Bytes("signal_arbitration") # int
+    GLOBAL_ENABLE_TIME_CHECKS = Bytes("enable_time_checks") # int
+    GLOBAL_CONTRACT_BALANCE = Bytes("contract_balance") # int
     GLOBAL_CONTRACT_ADDRESS = Bytes("contract_address") # byteslice
-    GLOBAL_CONTRACT_BALANCE = Bytes("contract_balance") # byteslice
     # ^^^ ^^^ ^^^
     SIGNAL_PULL_OUT=Bytes("signal_pull_out") # CONSTANT
     SIGNAL_ARBITRATION=Bytes("signal_arbitration") # CONSTANT
@@ -40,7 +41,10 @@ def approval_program():
             If(
                 And(
                     Txn.sender() == App.globalGet(GLOBAL_BUYER),
-                    # Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END)
+                    And(
+                        App.globalGet(GLOBAL_ENABLE_TIME_CHECKS) == Int(1),
+                        Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END)
+                    )
                 )
             )
             .Then(
@@ -62,7 +66,10 @@ def approval_program():
             If(
                 And(
                     Txn.sender() == App.globalGet(GLOBAL_BUYER),
-                    # Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_EXTENSION)
+                    And(
+                        App.globalGet(GLOBAL_ENABLE_TIME_CHECKS) == Int(1),
+                        Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE_EXTENSION)  
+                    )
                 )
             )
             .Then(
@@ -82,7 +89,10 @@ def approval_program():
                     Txn.sender() == App.globalGet(GLOBAL_SELLER),
                     App.globalGet(GLOBAL_SIGNAL_PULL_OUT) == Int(0),
                     App.globalGet(GLOBAL_SIGNAL_ARBITRATION) == Int(0),
-                    # Global.latest_timestamp() > App.globalGet(GLOBAL_CLOSING_DATE),
+                    And(
+                        App.globalGet(GLOBAL_ENABLE_TIME_CHECKS) == Int(1),
+                        Global.latest_timestamp() > App.globalGet(GLOBAL_CLOSING_DATE)
+                    ) 
                 )
             )
             .Then(
@@ -110,7 +120,10 @@ def approval_program():
             If(
                 And(
                     Txn.sender() == App.globalGet(GLOBAL_BUYER),
-                    # Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END),
+                    And(
+                        App.globalGet(GLOBAL_ENABLE_TIME_CHECKS) == Int(1),
+                        Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END)
+                    ),
                     Or(
                         And(
                             App.globalGet(GLOBAL_SIGNAL_PULL_OUT) > Int(0),
@@ -148,10 +161,13 @@ def approval_program():
                 And(
                     Txn.sender() == App.globalGet(GLOBAL_ARBITER),
                     App.globalGet(GLOBAL_SIGNAL_ARBITRATION) > Int(0),
-                    # Global.latest_timestamp() > App.globalGet(GLOBAL_CLOSING_DATE),
+                    And(
+                        App.globalGet(GLOBAL_ENABLE_TIME_CHECKS) == Int(1),
+                        Global.latest_timestamp() > App.globalGet(GLOBAL_CLOSING_DATE)
+                    ),
                     Or(
                         App.globalGet(GLOBAL_SELLER) == Txn.application_args[1],
-                        App.globalGet(GLOBAL_BUYER) == Txn.application_args[1],
+                        App.globalGet(GLOBAL_BUYER) == Txn.application_args[1]
                     )
                 )
             )
@@ -162,15 +178,7 @@ def approval_program():
                         TxnField.type_enum: TxnType.Payment,
                         TxnField.amount: Balance(Global.current_application_address()) - Global.min_balance() - Global.min_txn_fee(),
                         TxnField.sender: Global.current_application_address(),
-                        # TxnField.receiver: Txn.application_args[1],
-                        TxnField.receiver: 
-                            # If(App.globalGet(GLOBAL_BUYER) == Txn.application_args[1])
-                            # .Then(
-                                # Txn.accounts[0]
-                            # )
-                            # .Else(
-                                Txn.accounts[0],
-                            # ),
+                        TxnField.receiver: Txn.accounts[1],
                         TxnField.fee: Global.min_txn_fee(),
                     }),
                     InnerTxnBuilder.Submit()
@@ -189,15 +197,11 @@ def approval_program():
                 Or(
                     And(
                         Gtxn[0].sender() == App.globalGet(GLOBAL_BUYER),
-                        Gtxn[0].amount() == App.globalGet(GLOBAL_1st_ESCROW_AMOUNT),
-                        # Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_BEGIN),
-                        # Balance(Global.current_application_address()) == Global.min_balance()
+                        Gtxn[0].amount() == App.globalGet(GLOBAL_1st_ESCROW_AMOUNT)
                     ),
                     And(
                         Gtxn[0].sender() == App.globalGet(GLOBAL_BUYER),
-                        Gtxn[0].amount() == App.globalGet(GLOBAL_2nd_ESCROW_AMOUNT),
-                        # Global.latest_timestamp() > App.globalGet(GLOBAL_INSPECTION_BEGIN),
-                        # Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE)
+                        Gtxn[0].amount() == App.globalGet(GLOBAL_2nd_ESCROW_AMOUNT)
                     )
                 )
             )
@@ -214,15 +218,32 @@ def approval_program():
         ])
 
     @Subroutine(TealType.none)
+    def delete_app():
+        return Seq(
+            [
+                InnerTxnBuilder.Begin(),
+                InnerTxnBuilder.SetFields({
+                    TxnField.type_enum: TxnType.Payment,
+                    TxnField.amount: Balance(Global.current_application_address()) - Global.min_txn_fee(),
+                    TxnField.sender: Global.current_application_address(),
+                    TxnField.receiver: App.globalGet(GLOBAL_CREATOR),
+                    TxnField.fee: Global.min_txn_fee(),
+                    TxnField.close_remainder_to: Txn.sender()
+                }),
+                InnerTxnBuilder.Submit(),
+                Approve()
+            ]
+        )
+
+    @Subroutine(TealType.none)
     def fund_minimum_balance():
         return Seq([
             If(
-                And(
+                Or(
                     Gtxn[0].sender() == App.globalGet(GLOBAL_BUYER),
-                    # Gtxn[0].sender() == App.globalGet(GLOBAL_CREATOR)
-                    # Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_BEGIN),
-                    # Gtxn[0].amount() == Global.min_balance(),
-                    # Balance(Global.current_application_address()) == Int(0)
+                    Gtxn[0].sender() == App.globalGet(GLOBAL_CREATOR),
+                    Gtxn[0].sender() == App.globalGet(GLOBAL_SELLER),
+                    Gtxn[0].sender() == App.globalGet(GLOBAL_ARBITER)
                 )
             )
             .Then(
@@ -235,18 +256,18 @@ def approval_program():
 
     return program.event(
         init=Seq(
-            App.globalPut(GLOBAL_CREATOR, Txn.sender()),
-            App.globalPut(GLOBAL_INSPECTION_BEGIN, Btoi(Txn.application_args[0])),
-            App.globalPut(GLOBAL_INSPECTION_END, Btoi(Txn.application_args[1])),
-            App.globalPut(GLOBAL_INSPECTION_EXTENSION, Btoi(Txn.application_args[2])),
-            App.globalPut(GLOBAL_CLOSING_DATE, Btoi(Txn.application_args[3])),
-            App.globalPut(GLOBAL_CLOSING_DATE_EXTENSION, Btoi(Txn.application_args[4])),
+            App.globalPut(GLOBAL_CREATOR, Txn.sender()), # byte_slice
+            App.globalPut(GLOBAL_INSPECTION_BEGIN, Btoi(Txn.application_args[0])), # int
+            App.globalPut(GLOBAL_INSPECTION_END, Btoi(Txn.application_args[1])), # int
+            App.globalPut(GLOBAL_INSPECTION_EXTENSION, Btoi(Txn.application_args[2])), # int
+            App.globalPut(GLOBAL_CLOSING_DATE, Btoi(Txn.application_args[3])), # int
+            App.globalPut(GLOBAL_CLOSING_DATE_EXTENSION, Btoi(Txn.application_args[4])), # int
             App.globalPut(GLOBAL_SALE_PRICE, 
                 If(
                     And(
                         Btoi(Txn.application_args[5]) == Btoi(Txn.application_args[6]) + Btoi(Txn.application_args[7]),
                         Btoi(Txn.application_args[6]) < Btoi(Txn.application_args[7]),
-                        Btoi(Txn.application_args[5]) > Int(100000) # Value of Escrow must be at least 1 ALGO
+                        Btoi(Txn.application_args[5]) > Int(100000) # Value of Escrow must be at least .1 ALGO
                     )
                 )
                 .Then(
@@ -255,18 +276,23 @@ def approval_program():
                 .Else(
                     Reject()
                 )
-            ),
-            App.globalPut(GLOBAL_1st_ESCROW_AMOUNT, Btoi(Txn.application_args[6])),
-            App.globalPut(GLOBAL_2nd_ESCROW_AMOUNT, Btoi(Txn.application_args[7])),
-            App.globalPut(GLOBAL_BUYER, Txn.application_args[8]),
-            App.globalPut(GLOBAL_SELLER, Txn.application_args[9]),
-            App.globalPut(GLOBAL_ARBITER, Txn.sender()),
-            App.globalPut(GLOBAL_SIGNAL_PULL_OUT, Int(0)),
-            App.globalPut(GLOBAL_SIGNAL_ARBITRATION, Int(0)),
+            ), # int
+            App.globalPut(GLOBAL_1st_ESCROW_AMOUNT, Btoi(Txn.application_args[6])), # int
+            App.globalPut(GLOBAL_2nd_ESCROW_AMOUNT, Btoi(Txn.application_args[7])), # int
+            App.globalPut(GLOBAL_BUYER, Txn.application_args[8]), # byte_slice
+            App.globalPut(GLOBAL_SELLER, Txn.application_args[9]), # byte_slice
+            App.globalPut(GLOBAL_ARBITER, Txn.sender()), # byte_slice
+            App.globalPut(GLOBAL_SIGNAL_PULL_OUT, Int(0)), # int
+            App.globalPut(GLOBAL_SIGNAL_ARBITRATION, Int(0)), # int
+            App.globalPut(GLOBAL_ENABLE_TIME_CHECKS, Btoi(Txn.application_args[11])), # int
             Approve()
         ),
         close_out=Seq(Approve()),
         update=Seq(Approve()),
+        delete=Seq([
+            delete_app(),
+            Reject()
+        ]),
         no_op=Seq(
             Cond(
                 [ Txn.application_args[0] == SIGNAL_PULL_OUT, signal_pull_out() ],

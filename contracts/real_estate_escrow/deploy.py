@@ -30,25 +30,25 @@ def create_app(
     params.flat_fee = True
     params.fee = 1000
 
-    # txn = transaction.ApplicationCreateTxn(
-    #     sender,
-    #     params,
-    #     on_complete,
-    #     approval_program,
-    #     clear_program,
-    #     global_schema,
-    #     local_schema,
-    #     app_args,
-    # )
-
-    txn = transaction.ApplicationUpdateTxn(
+    txn = transaction.ApplicationCreateTxn(
         sender,
         params,
-        config.app_id,
+        on_complete,
         approval_program,
         clear_program,
-        app_args
+        global_schema,
+        local_schema,
+        app_args,
     )
+
+    # txn = transaction.ApplicationUpdateTxn(
+    #     sender,
+    #     params,
+    #     config.app_id,
+    #     approval_program,
+    #     clear_program,
+    #     app_args
+    # )
 
     # sign transaction
     signed_txn = txn.sign(private_key)
@@ -65,9 +65,9 @@ def create_app(
 
     print(transaction_response)
 
-    # app_id = transaction_response["application-index"]
+    app_id = transaction_response["application-index"]
     
-    app_id = transaction_response["txn"]["txn"]["apid"]
+    # app_id = transaction_response["txn"]["txn"]["apid"]
     
     print("Created new app-id:", app_id)
 
@@ -132,22 +132,25 @@ def main():
         200000, # 2nd_escrow_amount
         decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # buyer
         decode_address("QHGMAMCTEHZ2RQV2DRXSPAKIIT3REVK46CHNDJSW6WNXJLSJ7BB76NHDGY"), # seller
-        "" # arbiter
+        "", # arbiter
+        1
     ]
 
-    # app_id = create_app(
-    #     algod_client,
-    #     creator_private_key,
-    #     approval_program_compiled,
-    #     clear_state_program_compiled,
-    #     global_schema,
-    #     local_schema,
-    #     app_args,
-    # )
+    app_id = create_app(
+        algod_client,
+        creator_private_key,
+        approval_program_compiled,
+        clear_state_program_compiled,
+        global_schema,
+        local_schema,
+        app_args,
+    )
 
-    # global_state = read_global_state(
-    #         algod_client, account.address_from_private_key(creator_private_key), app_id
-    # ),
+    print(app_id)
+
+    global_state = read_global_state(
+            algod_client, account.address_from_private_key(creator_private_key), app_id
+    ),
 
     # print("Global state: {}".format(
     #         json.dumps(global_state, indent=4)
