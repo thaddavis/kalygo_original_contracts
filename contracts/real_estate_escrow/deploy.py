@@ -88,8 +88,8 @@ def main():
     # declare application state storage (immutable)
     local_ints = 0
     local_bytes = 0
-    global_ints = 12
-    global_bytes = 5
+    global_ints = 19
+    global_bytes = 11
     global_schema = transaction.StateSchema(global_ints, global_bytes)
     local_schema = transaction.StateSchema(local_ints, local_bytes)
  
@@ -122,18 +122,29 @@ def main():
     closingDateExtension = int(get_future_timestamp_in_secs(360))
     
     app_args = [
-        intToBytes(inspectionBegin), #
-        intToBytes(inspectionEnd), #
-        intToBytes(inspectionExtension), #
-        intToBytes(closingDate), #
-        intToBytes(closingDateExtension), #
-        300000, # sale_price
-        100000, # 1st_escrow_amount
-        200000, # 2nd_escrow_amount
-        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # buyer
-        decode_address("QHGMAMCTEHZ2RQV2DRXSPAKIIT3REVK46CHNDJSW6WNXJLSJ7BB76NHDGY"), # seller
-        "", # arbiter
-        1
+        intToBytes(inspectionBegin), # 0
+        intToBytes(inspectionEnd), # 1
+        intToBytes(inspectionExtension), # 2
+        intToBytes(closingDate), # 3
+        intToBytes(closingDateExtension), # 4
+        300000, # 5 sale_price 
+        100000, # 6 1st_escrow_amount
+        200000, # 7 2nd_escrow_amount
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 8 buyer
+        decode_address("QHGMAMCTEHZ2RQV2DRXSPAKIIT3REVK46CHNDJSW6WNXJLSJ7BB76NHDGY"), # 9 seller
+        "", # 10 arbiter
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 11 buyer realtor
+        3, # 12 buyer realtor commission
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 13 seller realtor
+        3, # 14 seller realtor commission
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 15 title company address
+        3, # 16 title company min fee
+        6, # 17 title company max fee
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 18 jurisdiction address
+        3, # 19 jurisdiction min fee
+        6, # 20 jurisdiction max fee
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 21 lender address
+        1 # 22 - enable_time_checks
     ]
 
     app_id = create_app(

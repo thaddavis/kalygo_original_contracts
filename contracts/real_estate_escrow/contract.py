@@ -13,6 +13,21 @@ def approval_program():
     GLOBAL_SELLER=Bytes("seller") # byteslice
     GLOBAL_ARBITER=Bytes("arbiter") # byteslice
     GLOBAL_BUYER=Bytes("buyer") # byteslice
+    GLOBAL_BUYER_REALTOR=Bytes("buyer_realtor") # byteslice
+    # GLOBAL_BUYER_REALTOR_COMMISSION=Bytes("buyer_realtor_commision") # int
+    GLOBAL_SELLER_REALTOR=Bytes("seller_realtor") # byteslice
+    # GLOBAL_SELLER_REALTOR_COMMISSION=Bytes("seller_realtor_commision") # int
+    GLOBAL_TITLE_COMPANY=Bytes("title_company") # byteslice
+    GLOBAL_TITLE_COMPANY_FEE=Bytes("title_company_fee") # int
+    # GLOBAL_TITLE_COMPANY_MIN_FEE=Bytes("title_company_min_fee") # int
+    # GLOBAL_TITLE_COMPANY_MAX_FEE=Bytes("title_company_max_fee") # int
+    GLOBAL_JURISDICTION=Bytes("jurisdiction") # byteslice
+    GLOBAL_JURISDICTION_FEE=Bytes("jurisdiction_fee") # int
+    # GLOBAL_JURISDICTION_MIN_FEE=Bytes("jurisdiction_min_fee") # int
+    # GLOBAL_JURISDICTION_MAX_FEE=Bytes("jurisdiction_max_fee") # int
+    GLOBAL_LENDER=Bytes("lender") # byteslice
+    GLOBAL_LENDER_APPROVES=Bytes("lender_approves") # int
+    GLOBAL_DOWN_PAYMENT=Bytes("down_payment") # int
     GLOBAL_INSPECTION_BEGIN = Bytes("inspection_begin") # int
     GLOBAL_INSPECTION_END = Bytes("inspection_end") # int
     GLOBAL_INSPECTION_EXTENSION = Bytes("inspection_extension") # int
@@ -32,8 +47,8 @@ def approval_program():
     BUYER_WITHDRAW_FUNDS=Bytes("buyer_withdraw_funds") # CONSTANT
     SELLER_WITHDRAW_FUNDS=Bytes("seller_withdraw_funds") # CONSTANT
     ARBITER_WITHDRAW_FUNDS=Bytes("arbiter_withdraw_funds") # CONSTANT
-    FUND_CONTRACT=Bytes("fund_contract")
-    FUND_MINIMUM_BALANCE=Bytes("fund_minimum_balance")
+    FUND_CONTRACT=Bytes("fund_contract") # CONSTANT
+    FUND_MINIMUM_BALANCE=Bytes("fund_minimum_balance") # CONSTANT
     
     @Subroutine(TealType.none)
     def signal_pull_out():
@@ -289,10 +304,29 @@ def approval_program():
             App.globalPut(GLOBAL_2nd_ESCROW_AMOUNT, Btoi(Txn.application_args[7])), # int
             App.globalPut(GLOBAL_BUYER, Txn.application_args[8]), # byte_slice
             App.globalPut(GLOBAL_SELLER, Txn.application_args[9]), # byte_slice
-            App.globalPut(GLOBAL_ARBITER, Txn.sender()), # byte_slice
+            
+            App.globalPut(GLOBAL_ARBITER, Txn.sender()), # arbiter
+
+            # additions start here
+
+            App.globalPut(GLOBAL_BUYER_REALTOR, Txn.application_args[11]), # byte_slice - buyer realtor address
+            #  App.globalPut(GLOBAL_BUYER_REALTOR_COMMISSION, Txn.application_args[12]), # int - buyer realtor commision 
+            App.globalPut(GLOBAL_SELLER_REALTOR, Txn.application_args[12]), # byte_slice - seller realtor address
+            #  App.globalPut(GLOBAL_SELLER_REALTOR_COMMISSION, Txn.application_args[14]), # int - seller realtor commision
+            App.globalPut(GLOBAL_TITLE_COMPANY, Txn.application_args[13]), # byte_slice - title company address
+            App.globalPut(GLOBAL_TITLE_COMPANY_FEE, Txn.application_args[14]),
+            # App.globalPut(GLOBAL_TITLE_COMPANY_MIN_FEE, Txn.application_args[14]), # int - title company min fee
+            # App.globalPut(GLOBAL_TITLE_COMPANY_MAX_FEE, Txn.application_args[15]), # int - title company max fee
+            App.globalPut(GLOBAL_JURISDICTION, Txn.application_args[15]), # byte_slice - jurisdiction address
+            App.globalPut(GLOBAL_JURISDICTION_FEE, Txn.application_args[16]),
+            # App.globalPut(GLOBAL_JURISDICTION_MIN_FEE, Txn.application_args[17]), # int - jurisdiction min fee
+            # App.globalPut(GLOBAL_JURISDICTION_MAX_FEE, Txn.application_args[18]), # int - jurisdiction max fee
+            App.globalPut(GLOBAL_LENDER, Txn.application_args[17]), # byte_slice lender address
+            App.globalPut(GLOBAL_LENDER_APPROVES, Int(0)), # int lender approves
+            App.globalPut(GLOBAL_DOWN_PAYMENT, Int(20)), # int down payment
             App.globalPut(GLOBAL_SIGNAL_PULL_OUT, Int(0)), # int
             App.globalPut(GLOBAL_SIGNAL_ARBITRATION, Int(0)), # int
-            App.globalPut(GLOBAL_ENABLE_TIME_CHECKS, Btoi(Txn.application_args[11])), # int
+            App.globalPut(GLOBAL_ENABLE_TIME_CHECKS, Btoi(Txn.application_args[18])), # int <--- <---
             Approve()
         ),
         close_out=Seq(Approve()),
