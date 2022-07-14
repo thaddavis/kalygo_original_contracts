@@ -88,7 +88,7 @@ def main():
     # declare application state storage (immutable)
     local_ints = 0
     local_bytes = 0
-    global_ints = 19
+    global_ints = 13
     global_bytes = 11
     global_schema = transaction.StateSchema(global_ints, global_bytes)
     local_schema = transaction.StateSchema(local_ints, local_bytes)
@@ -124,27 +124,29 @@ def main():
     app_args = [
         intToBytes(inspectionBegin), # 0
         intToBytes(inspectionEnd), # 1
-        intToBytes(inspectionExtension), # 2
-        intToBytes(closingDate), # 3
-        intToBytes(closingDateExtension), # 4
-        300000, # 5 sale_price 
-        100000, # 6 1st_escrow_amount
-        200000, # 7 2nd_escrow_amount
-        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 8 buyer
-        decode_address("QHGMAMCTEHZ2RQV2DRXSPAKIIT3REVK46CHNDJSW6WNXJLSJ7BB76NHDGY"), # 9 seller
-        "", # 10 arbiter
-        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 11 buyer realtor
-        3, # 12 buyer realtor commission
-        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 13 seller realtor
-        3, # 14 seller realtor commission
-        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 15 title company address
-        3, # 16 title company min fee
-        6, # 17 title company max fee
-        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 18 jurisdiction address
-        3, # 19 jurisdiction min fee
-        6, # 20 jurisdiction max fee
-        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 21 lender address
-        1 # 22 - enable_time_checks
+        # intToBytes(inspectionExtension), #
+        intToBytes(closingDate), # 2
+        # intToBytes(closingDateExtension), #
+        300000, # 3 sale_price 
+        100000, # 4 1st_escrow_amount
+        200000, # 5 2nd_escrow_amount
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 6 buyer
+        decode_address("QHGMAMCTEHZ2RQV2DRXSPAKIIT3REVK46CHNDJSW6WNXJLSJ7BB76NHDGY"), # 7 seller
+        "", # 8 arbiter
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 9 buyer realtor
+        # 3, # buyer realtor commission
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 10 seller realtor
+        # 3, # seller realtor commission
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 11 title company address
+        # 3, # title company min fee
+        # 6, # title company max fee
+        6, # 12 title company fee
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 13 jurisdiction address
+        # 3, # jurisdiction min fee
+        # 6, # jurisdiction max fee
+        6, # 14 jurisdiction fee
+        decode_address("RHKHUONCBB7JOIQ2RDCSV3NUX5JFKLLOG2RKN4LRIJ6DQMAIBTFLLO72DM"), # 15 lender address
+        # 1 # enable_time_checks
     ]
 
     app_id = create_app(

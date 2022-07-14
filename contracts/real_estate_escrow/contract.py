@@ -30,7 +30,7 @@ def approval_program():
     GLOBAL_DOWN_PAYMENT=Bytes("down_payment") # int
     GLOBAL_INSPECTION_BEGIN = Bytes("inspection_begin") # int
     GLOBAL_INSPECTION_END = Bytes("inspection_end") # int
-    GLOBAL_INSPECTION_EXTENSION = Bytes("inspection_extension") # int
+    # GLOBAL_INSPECTION_EXTENSION = Bytes("inspection_extension") # int
     GLOBAL_CLOSING_DATE = Bytes("closing_date") # int
     GLOBAL_CLOSING_DATE_EXTENSION = Bytes("closing_date_extension") # int
     GLOBAL_SALE_PRICE=Bytes("sale_price") # int
@@ -282,51 +282,52 @@ def approval_program():
             App.globalPut(GLOBAL_CREATOR, Txn.sender()), # byte_slice
             App.globalPut(GLOBAL_INSPECTION_BEGIN, Btoi(Txn.application_args[0])), # int
             App.globalPut(GLOBAL_INSPECTION_END, Btoi(Txn.application_args[1])), # int
-            App.globalPut(GLOBAL_INSPECTION_EXTENSION, Btoi(Txn.application_args[2])), # int
-            App.globalPut(GLOBAL_CLOSING_DATE, Btoi(Txn.application_args[3])), # int
-            App.globalPut(GLOBAL_CLOSING_DATE_EXTENSION, Btoi(Txn.application_args[4])), # int
+            # App.globalPut(GLOBAL_INSPECTION_EXTENSION, Btoi(Txn.application_args[2])), # int
+            App.globalPut(GLOBAL_CLOSING_DATE, Btoi(Txn.application_args[2])), # int
+            # App.globalPut(GLOBAL_CLOSING_DATE_EXTENSION, Btoi(Txn.application_args[4])), # int
             App.globalPut(GLOBAL_SALE_PRICE, 
                 If(
                     And(
-                        Btoi(Txn.application_args[5]) == Btoi(Txn.application_args[6]) + Btoi(Txn.application_args[7]),
-                        Btoi(Txn.application_args[6]) < Btoi(Txn.application_args[7]),
-                        Btoi(Txn.application_args[5]) > Int(100000) # Value of Escrow must be at least .1 ALGO
+                        # Btoi(Txn.application_args[3]) == Btoi(Txn.application_args[4]) + Btoi(Txn.application_args[5]),
+                        Btoi(Txn.application_args[4]) < Btoi(Txn.application_args[5]),
+                        Btoi(Txn.application_args[3]) > Int(100000) # Value of assets must be at least .1 ALGO
                     )
                 )
                 .Then(
-                    Btoi(Txn.application_args[5])
+                    Btoi(Txn.application_args[3])
                 )
                 .Else(
                     Reject()
                 )
             ), # int
-            App.globalPut(GLOBAL_1st_ESCROW_AMOUNT, Btoi(Txn.application_args[6])), # int
-            App.globalPut(GLOBAL_2nd_ESCROW_AMOUNT, Btoi(Txn.application_args[7])), # int
-            App.globalPut(GLOBAL_BUYER, Txn.application_args[8]), # byte_slice
-            App.globalPut(GLOBAL_SELLER, Txn.application_args[9]), # byte_slice
+            App.globalPut(GLOBAL_1st_ESCROW_AMOUNT, Btoi(Txn.application_args[4])), # int
+            App.globalPut(GLOBAL_2nd_ESCROW_AMOUNT, Btoi(Txn.application_args[5])), # int
+            App.globalPut(GLOBAL_BUYER, Txn.application_args[6]), # byte_slice
+            App.globalPut(GLOBAL_SELLER, Txn.application_args[7]), # byte_slice
             
             App.globalPut(GLOBAL_ARBITER, Txn.sender()), # arbiter
 
             # additions start here
 
-            App.globalPut(GLOBAL_BUYER_REALTOR, Txn.application_args[11]), # byte_slice - buyer realtor address
+            App.globalPut(GLOBAL_BUYER_REALTOR, Txn.application_args[9]), # byte_slice - buyer realtor address
             #  App.globalPut(GLOBAL_BUYER_REALTOR_COMMISSION, Txn.application_args[12]), # int - buyer realtor commision 
-            App.globalPut(GLOBAL_SELLER_REALTOR, Txn.application_args[12]), # byte_slice - seller realtor address
+            App.globalPut(GLOBAL_SELLER_REALTOR, Txn.application_args[10]), # byte_slice - seller realtor address
             #  App.globalPut(GLOBAL_SELLER_REALTOR_COMMISSION, Txn.application_args[14]), # int - seller realtor commision
-            App.globalPut(GLOBAL_TITLE_COMPANY, Txn.application_args[13]), # byte_slice - title company address
-            App.globalPut(GLOBAL_TITLE_COMPANY_FEE, Txn.application_args[14]),
+            App.globalPut(GLOBAL_TITLE_COMPANY, Txn.application_args[11]), # byte_slice - title company address
+            App.globalPut(GLOBAL_TITLE_COMPANY_FEE, Btoi(Txn.application_args[12])), # int
             # App.globalPut(GLOBAL_TITLE_COMPANY_MIN_FEE, Txn.application_args[14]), # int - title company min fee
             # App.globalPut(GLOBAL_TITLE_COMPANY_MAX_FEE, Txn.application_args[15]), # int - title company max fee
-            App.globalPut(GLOBAL_JURISDICTION, Txn.application_args[15]), # byte_slice - jurisdiction address
-            App.globalPut(GLOBAL_JURISDICTION_FEE, Txn.application_args[16]),
+            App.globalPut(GLOBAL_JURISDICTION, Txn.application_args[13]), # byte_slice - jurisdiction address
+            App.globalPut(GLOBAL_JURISDICTION_FEE, Btoi(Txn.application_args[14])), # int
             # App.globalPut(GLOBAL_JURISDICTION_MIN_FEE, Txn.application_args[17]), # int - jurisdiction min fee
             # App.globalPut(GLOBAL_JURISDICTION_MAX_FEE, Txn.application_args[18]), # int - jurisdiction max fee
-            App.globalPut(GLOBAL_LENDER, Txn.application_args[17]), # byte_slice lender address
+            App.globalPut(GLOBAL_LENDER, Txn.application_args[15]), # byte_slice lender address
             App.globalPut(GLOBAL_LENDER_APPROVES, Int(0)), # int lender approves
             App.globalPut(GLOBAL_DOWN_PAYMENT, Int(20)), # int down payment
             App.globalPut(GLOBAL_SIGNAL_PULL_OUT, Int(0)), # int
             App.globalPut(GLOBAL_SIGNAL_ARBITRATION, Int(0)), # int
-            App.globalPut(GLOBAL_ENABLE_TIME_CHECKS, Btoi(Txn.application_args[18])), # int <--- <---
+            # App.globalPut(GLOBAL_ENABLE_TIME_CHECKS, Btoi(Txn.application_args[16])), # int <--- <---
+            App.globalPut(GLOBAL_ENABLE_TIME_CHECKS, Int(1)), # int <--- <---
             Approve()
         ),
         close_out=Seq(Approve()),
