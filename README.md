@@ -1,5 +1,3 @@
-<!-- ![alt text](https://github.com/thaddavis/kalygo_contracts/blob/main/project_banner_photo.png?raw=true) -->
-
 <img src="project_banner_photo.png" width="360"/>
 
 # Kalygo.io CONTRACTS
