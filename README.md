@@ -1,3 +1,5 @@
+![alt text](https://github.com/thaddavis/kalygo_contracts/blob/main/project_banner_photo.png?raw=true)
+
 # Kalygo.io CONTRACTS
 This is the front end for the kalygo.io website. The concept of this site is it is the front end for a website that allows visitors to implement common real estate transactions on a blockchain.
 
