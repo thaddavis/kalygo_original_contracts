@@ -9,13 +9,13 @@ The website has three common Real Estate contracts (or financial vehicles):
 
 found in the `./contracts/contract.py` file
 
-2) Cash purchase (in development)
-
-Coming Soon...
-
-3) REIT (in development)
+2) REIT (in development)
 
 Implemented as a non-fungible ASA
+
+3) Cash purchase (in development)
+
+Coming Soon...
 
 ## Greenhouse Hackathon Related Information
 I began working on this concept after the `Miami for Everyone` hackathon that was sponsored by ALGORAND in Miami on the dates of JUNE 17-19, 2022. I did most of the work for this app in the first 2 weeks of July and as I was interacting with the ALGORAND discord during development I found out about the Greenhouse hackathon.
