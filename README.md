@@ -9,7 +9,7 @@ The website has three common Real Estate contracts (or financial vehicles):
 
 found in the `./contracts/contract.py` file
 
-2) REIT
+2) REIT (v1 implemented)
 
 Implemented as a non-fungible ASA
 
